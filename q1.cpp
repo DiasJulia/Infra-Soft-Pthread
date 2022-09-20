@@ -11,6 +11,7 @@ struct Params
 {
     int candidate;
     int n;
+    int *candidates;
 };
 
 void *countVotes2(void *params)
@@ -41,8 +42,9 @@ void *countVotes2(void *params)
         }
         file.close();
     }
-    string exit = "counter " + to_string(candidate) + " = " + to_string(counter) + "\n";
-    cout << exit << endl;
+    // string exit = "counter " + to_string(candidate) + " = " + to_string(counter) + "\n";
+    // cout << exit << endl;
+    ((Params *)params)->candidates[candidate] = counter;
     return NULL;
 }
 
@@ -70,11 +72,23 @@ int main()
         thread_ids[t] = (Params *)malloc(sizeof(Params));
         (*thread_ids[t]).candidate = t;
         (*thread_ids[t]).n = numBairros;
-        printf("thread_ids[%d] para o candidato %d\n", t, t);
+        (*thread_ids[t]).candidates = (int *)candidates;
+        // printf("thread_ids[%d] para o candidato %d\n", t, t);
         rc = pthread_create(&threads[t], NULL, countVotes2, (void *)thread_ids[t]);
     }
 
-    printf("Main\n");
+    for (t = 0; t < numCandidates + 1; t++)
+    {
+        pthread_join(threads[t], NULL);
+    }
+
+    cout << "Votos nulos: " << ((int *)candidates)[0] << endl;
+
+    for (t = 1; t < numCandidates + 1; t++)
+    {
+        cout << "Votos no candidato " << t << ": " << ((int *)candidates)[t] << endl;
+    }
+
     pthread_exit(NULL);
 
     return 0;
