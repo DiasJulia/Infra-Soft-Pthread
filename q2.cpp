@@ -17,7 +17,7 @@ struct Params
 void *ctrlTrains(void *params)
 {
     Params *p = (Params *)params;
-    for (int i = 0; i < 5; i++)
+    for (int i = 1; i <= 5; i++)
     {
         // Só tá deixando passar 2 de cada vez, caso tenha 2 ou mais ele tenta de novo
         pthread_mutex_lock(&p->mutexes[i]);
@@ -45,7 +45,7 @@ void *ctrlTrains(void *params)
 int main()
 {
 
-    int numTrains = 5;
+    int numTrains = 10;
     int numIntersections = 5;
 
     void *intersections = calloc(numIntersections + 1, sizeof(int));
@@ -57,7 +57,7 @@ int main()
     int rc;
     int t;
 
-    for (t = 0; t < numTrains + 1; t++)
+    for (t = 1; t < numTrains + 1; t++)
     {
         thread_ids[t] = (Params *)malloc(sizeof(Params));
         (*thread_ids[t]).train = t;
