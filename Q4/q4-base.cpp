@@ -134,35 +134,11 @@ vector<aresta> find_best_edges(vector<vector<pair<int, int>>> grafo, Floresta &f
     return best_edges;
 }
 
-struct Params
-{
-    aresta best_edge;
-    vector<aresta> *mst;
-    Floresta *f;
-};
-
-void *bestEdge(void *param)
-{
-    aresta best_edge = ((Params *)param)->best_edge;
-    int n1 = best_edge.node1;
-    int n2 = best_edge.node2;
-
-    if ((*((Params *)param)->f).Find(n1) != (*((Params *)param)->f).Find(n2))
-    {
-        (*((Params *)param)->mst).push_back(best_edge);
-        (*((Params *)param)->f).Union(n1, n2);
-    }
-    return NULL;
-}
-
 vector<aresta> boruvka(vector<vector<pair<int, int>>> grafo)
 {
     vector<aresta> mst;
 
     int n_nodes = grafo.size();
-
-    pthread_t threads[grafo.size()];
-    Params *thread_ids[grafo.size()];
 
     Floresta f(n_nodes); // criar conjunto de arvores (floresta)
 
@@ -173,24 +149,17 @@ vector<aresta> boruvka(vector<vector<pair<int, int>>> grafo)
         vector<aresta> best_edges = find_best_edges(grafo, f, mst);
 
         // commit das arestas e uniao das arvores:
-        int i = 0;
         for (auto best_edge : best_edges)
         {
-            Params *p = (Params *)malloc(sizeof(Params));
-            p->best_edge = best_edge;
-            p->mst = &mst;
-            p->f = &f;
-            thread_ids[i] = p; // Talvez isso possa sair daqui
 
-            pthread_create(&threads[i], NULL, bestEdge, (void *)p);
-            i++;
-        }
+            int n1 = best_edge.node1;
+            int n2 = best_edge.node2;
 
-        i = 0;
-        for (auto best_edge : best_edges)
-        {
-            pthread_join(threads[i], NULL);
-            i++;
+            if (f.Find(n1) != f.Find(n2))
+            {
+                mst.push_back(best_edge);
+                f.Union(n1, n2);
+            }
         }
     }
     return mst;
